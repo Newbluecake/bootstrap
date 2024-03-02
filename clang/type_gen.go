@@ -80,6 +80,50 @@ func (t Type) PointeeType() Type {
 	return Type{C.clang_getPointeeType(t.c)}
 }
 
+// GetUnqualifiedType retrieve the unqualified variant of the given type, removing as
+// little sugar as possible.
+//
+// For example, given the following series of typedefs:
+//
+//	typedef int Integer;
+//	typedef const Integer CInteger;
+//	typedef CInteger DifferenceType;
+//
+// Executing GetUnqualifiedType() on a CXType that
+// represents DifferenceType, will desugar to a type representing
+// Integer, that has no qualifiers.
+//
+// And, executing GetUnqualifiedType() on the type of the
+// first argument of the following function declaration:
+//
+//	void foo(const int);
+//
+// Will return a type representing int, removing the const
+// qualifier.
+//
+// Sugar over array types is not desugared.
+//
+// A type can be checked for qualifiers with \c
+// clang_isConstQualifiedType(), clang_isVolatileQualifiedType()
+// and clang_isRestrictQualifiedType().
+//
+// A type that resulted from a call to GetUnqualifiedType
+// will return false for all of the above calls.
+func (t Type) UnqualifiedType() Type {
+	return Type{C.clang_getUnqualifiedType(t.c)}
+}
+
+// GetNonReferenceType for reference types (e.g., "const int&"), returns the type that the
+// reference refers to (e.g "const int").
+//
+// Otherwise, returns the type itself.
+//
+// A type that has kind CXType_LValueReference or
+// CXType_RValueReference is a reference type.
+func (t Type) NonReferenceType() Type {
+	return Type{C.clang_getNonReferenceType(t.c)}
+}
+
 // GetTypeDeclaration return the cursor for the declaration of the given type.
 func (t Type) Declaration() Cursor {
 	return Cursor{C.clang_getTypeDeclaration(t.c)}

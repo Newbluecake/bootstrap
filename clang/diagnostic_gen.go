@@ -1,6 +1,6 @@
 package clang
 
-// #include "./clang-c/Index.h"
+// #include "./clang-c/CXDiagnostic.h"
 // #include "go-clang.h"
 import "C"
 
@@ -118,7 +118,7 @@ func (d Diagnostic) NumRanges() uint32 {
 //
 // Parameter Diagnostic the diagnostic whose range is being extracted.
 //
-// Parameter Range the zero-based index specifying which range to
+// # Parameter Range the zero-based index specifying which range to
 //
 // Returns the requested source range.
 func (d Diagnostic) Range(r uint32) SourceRange {

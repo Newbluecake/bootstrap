@@ -34,6 +34,26 @@ func (c Cursor) ParsedComment() Comment {
 	return Comment{C.clang_Cursor_getParsedComment(c.c)}
 }
 
+// GetSymbolGraphForCursor generate a single symbol symbol graph for the declaration at the given
+// cursor. Returns a null string if the AST node for the cursor isn't a
+// declaration.
+//
+// The output contains the symbol graph as well as some additional information
+// about related symbols.
+//
+// Parameter cursor the declaration for which to generate the single symbol symbol
+// graph.
+//
+// Returns a string containing the serialized symbol graph representation for
+// the symbol being queried or a null string if it can not be found in the
+// APISet.
+func (c Cursor) SymbolGraphForCursor() string {
+	o := cxstring{C.clang_getSymbolGraphForCursor(c.c)}
+	defer o.Dispose()
+
+	return o.String()
+}
+
 // GetNullCursor retrieve the NULL cursor, which represents no entity.
 func NewNullCursor() Cursor {
 	return Cursor{C.clang_getNullCursor()}
@@ -152,11 +172,11 @@ func (c Cursor) TranslationUnit() TranslationUnit {
 // clang_getCursorLexicalParent()). They diverge when declarations or
 // definitions are provided out-of-line. For example:
 //
-//  class C {
-//  void f();
-//  };
+//	class C {
+//	void f();
+//	};
 //
-//  void C::f() { }
+//	void C::f() { }
 //
 // In the out-of-line definition of C::f, the semantic parent is
 // the class C, of which this function is a member. The lexical parent is
@@ -185,11 +205,11 @@ func (c Cursor) SemanticParent() Cursor {
 // clang_getCursorSemanticParent()). They diverge when declarations or
 // definitions are provided out-of-line. For example:
 //
-//  class C {
-//  void f();
-//  };
+//	class C {
+//	void f();
+//	};
 //
-//  void C::f() { }
+//	void C::f() { }
 //
 // In the out-of-line definition of C::f, the semantic parent is
 // the class C, of which this function is a member. The lexical parent is
@@ -346,9 +366,26 @@ func (c Cursor) EnumConstantDeclUnsignedValue() uint64 {
 	return uint64(C.clang_getEnumConstantDeclUnsignedValue(c.c))
 }
 
-// GetFieldDeclBitWidth retrieve the bit width of a bit field declaration as an integer.
+// IsBitField returns non-zero if the cursor specifies a Record member that is a bit-field.
+func (c Cursor) IsBitField() bool {
+	o := C.clang_Cursor_isBitField(c.c)
+
+	return o != C.uint(0)
+}
+
+// GetFieldDeclBitWidth retrieve the bit width of a bit-field declaration as an integer.
 //
-// If a cursor that is not a bit field declaration is passed in, -1 is returned.
+// If the cursor does not reference a bit-field, or if the bit-field's width
+// expression cannot be evaluated, -1 is returned.
+//
+// For example:
+//
+//	if (clang_Cursor_isBitField(Cursor)) {
+//	int Width = GetFieldDeclBitWidth(Cursor);
+//	if (Width != -1) {
+//	// The bit-field width is not value-dependent.
+//	}
+//	}
 func (c Cursor) FieldDeclBitWidth() int32 {
 	return int32(C.clang_getFieldDeclBitWidth(c.c))
 }
@@ -371,8 +408,8 @@ func (c Cursor) Argument(i uint32) Cursor {
 	return Cursor{C.clang_Cursor_getArgument(c.c, C.uint(i))}
 }
 
-// NumTemplateArguments returns the number of template args of a function decl representing a
-// template specialization.
+// NumTemplateArguments returns the number of template args of a function, struct, or class decl
+// representing a template specialization.
 //
 // If the argument cursor cannot be converted into a template function
 // declaration, -1 is returned.
@@ -391,8 +428,9 @@ func (c Cursor) NumTemplateArguments() int32 {
 
 // TemplateArgumentKind retrieve the kind of the I'th template argument of the CXCursor C.
 //
-// If the argument CXCursor does not represent a FunctionDecl, an invalid
-// template argument kind is returned.
+// If the argument CXCursor does not represent a FunctionDecl, StructDecl, or
+// ClassTemplatePartialSpecialization, an invalid template argument kind is
+// returned.
 //
 // For example, for the following declaration and specialization:
 // template <typename T, int kInt, bool kBool>
@@ -410,9 +448,9 @@ func (c Cursor) TemplateArgumentKind(i uint32) TemplateArgumentKind {
 // TemplateArgumentType retrieve a CXType representing the type of a TemplateArgument of a
 // function decl representing a template specialization.
 //
-// If the argument CXCursor does not represent a FunctionDecl whose I'th
-// template argument has a kind of CXTemplateArgKind_Integral, an invalid type
-// is returned.
+// If the argument CXCursor does not represent a FunctionDecl, StructDecl,
+// ClassDecl or ClassTemplatePartialSpecialization whose I'th template argument
+// has a kind of CXTemplateArgKind_Integral, an invalid type is returned.
 //
 // For example, for the following declaration and specialization:
 // template <typename T, int kInt, bool kBool>
@@ -431,7 +469,8 @@ func (c Cursor) TemplateArgumentType(i uint32) Type {
 // decl representing a template specialization) as a signed long long.
 //
 // It is undefined to call this function on a CXCursor that does not represent a
-// FunctionDecl or whose I'th template argument is not an integral value.
+// FunctionDecl, StructDecl, ClassDecl or ClassTemplatePartialSpecialization
+// whose I'th template argument is not an integral value.
 //
 // For example, for the following declaration and specialization:
 // template <typename T, int kInt, bool kBool>
@@ -450,7 +489,8 @@ func (c Cursor) TemplateArgumentValue(i uint32) int64 {
 // decl representing a template specialization) as an unsigned long long.
 //
 // It is undefined to call this function on a CXCursor that does not represent a
-// FunctionDecl or whose I'th template argument is not an integral value.
+// FunctionDecl, StructDecl, ClassDecl or ClassTemplatePartialSpecialization or
+// whose I'th template argument is not an integral value.
 //
 // For example, for the following declaration and specialization:
 // template <typename T, int kInt, bool kBool>
@@ -546,13 +586,6 @@ func (c Cursor) IsInlineNamespace() bool {
 	return o != C.uint(0)
 }
 
-// IsBitField returns non-zero if the cursor specifies a Record member that is a bitfield.
-func (c Cursor) IsBitField() bool {
-	o := C.clang_Cursor_isBitField(c.c)
-
-	return o != C.uint(0)
-}
-
 // IsVirtualBase returns 1 if the base class specified by the cursor with kind CX_CXXBaseSpecifier is virtual.
 func (c Cursor) IsVirtualBase() bool {
 	o := C.clang_isVirtualBase(c.c)
@@ -608,6 +641,11 @@ func (c Cursor) OverloadedDecl(index uint32) Cursor {
 // this function returns the collection element type.
 func (c Cursor) IBOutletCollectionType() Type {
 	return Type{C.clang_getIBOutletCollectionType(c.c)}
+}
+
+// VisitChildrenWithBlock visits the children of a cursor using the specified block. Behaves identically to clang_visitChildren() in all other respects.
+func (c Cursor) VisitChildrenWithBlock(block CursorVisitorBlock) uint32 {
+	return uint32(C.clang_visitChildrenWithBlock(c.c, block.c))
 }
 
 // GetCursorUSR retrieve a Unified Symbol Resolution (USR) for the entity referenced
@@ -702,10 +740,10 @@ func (c Cursor) Referenced() Cursor {
 // unit, but only one of those declarations can also be a
 // definition. For example, given:
 //
-//  int f(int, int);
-//  int g(int x, int y) { return f(x, y); }
-//  int f(int a, int b) { return a + b; }
-//  int f(int, int);
+//	int f(int, int);
+//	int g(int x, int y) { return f(x, y); }
+//	int f(int a, int b) { return a + b; }
+//	int f(int, int);
 //
 // there are three declarations of the function "f", but only the
 // second one is a definition. The GetCursorDefinition()
@@ -735,11 +773,11 @@ func (c Cursor) IsCursorDefinition() bool {
 // times within a single translation unit. For example, a structure type can
 // be forward-declared (possibly multiple times) and later defined:
 //
-//  struct X;
-//  struct X;
-//  struct X {
-//  int member;
-//  };
+//	struct X;
+//	struct X;
+//	struct X {
+//	int member;
+//	};
 //
 // The declarations and the definition of X are represented by three
 // different cursors, all of which are declarations of the same underlying
@@ -953,6 +991,13 @@ func (c Cursor) CXXMethod_IsDefaulted() bool {
 	return o != C.uint(0)
 }
 
+// CXXMethod_IsDeleted determine if a C++ method is declared '= delete'.
+func (c Cursor) CXXMethod_IsDeleted() bool {
+	o := C.clang_CXXMethod_isDeleted(c.c)
+
+	return o != C.uint(0)
+}
+
 // CXXMethod_IsPureVirtual determine if a C++ member function or member function template is pure virtual.
 func (c Cursor) CXXMethod_IsPureVirtual() bool {
 	o := C.clang_CXXMethod_isPureVirtual(c.c)
@@ -970,6 +1015,107 @@ func (c Cursor) CXXMethod_IsStatic() bool {
 // CXXMethod_IsVirtual determine if a C++ member function or member function template is explicitly declared 'virtual' or if it overrides a virtual method from one of the base classes.
 func (c Cursor) CXXMethod_IsVirtual() bool {
 	o := C.clang_CXXMethod_isVirtual(c.c)
+
+	return o != C.uint(0)
+}
+
+// CXXMethod_IsCopyAssignmentOperator determine if a C++ member function is a copy-assignment operator,
+// returning 1 if such is the case and 0 otherwise.
+//
+// > A copy-assignment operator `X::operator=` is a non-static,
+// > non-template member function of _class_ `X` with exactly one
+// > parameter of type `X`, `X&`, `const X&`, `volatile X&` or `const
+// > volatile X&`.
+//
+// That is, for example, the `operator=` in:
+//
+// class Foo {
+// bool operator=(const volatile Foo&);
+// };
+//
+// Is a copy-assignment operator, while the `operator=` in:
+//
+// class Bar {
+// bool operator=(const int&);
+// };
+//
+// Is not.
+func (c Cursor) CXXMethod_IsCopyAssignmentOperator() bool {
+	o := C.clang_CXXMethod_isCopyAssignmentOperator(c.c)
+
+	return o != C.uint(0)
+}
+
+// CXXMethod_IsMoveAssignmentOperator determine if a C++ member function is a move-assignment operator,
+// returning 1 if such is the case and 0 otherwise.
+//
+// > A move-assignment operator `X::operator=` is a non-static,
+// > non-template member function of _class_ `X` with exactly one
+// > parameter of type `X&&`, `const X&&`, `volatile X&&` or `const
+// > volatile X&&`.
+//
+// That is, for example, the `operator=` in:
+//
+// class Foo {
+// bool operator=(const volatile Foo&&);
+// };
+//
+// Is a move-assignment operator, while the `operator=` in:
+//
+// class Bar {
+// bool operator=(const int&&);
+// };
+//
+// Is not.
+func (c Cursor) CXXMethod_IsMoveAssignmentOperator() bool {
+	o := C.clang_CXXMethod_isMoveAssignmentOperator(c.c)
+
+	return o != C.uint(0)
+}
+
+// CXXMethod_IsExplicit determines if a C++ constructor or conversion function was declared
+// explicit, returning 1 if such is the case and 0 otherwise.
+//
+// Constructors or conversion functions are declared explicit through
+// the use of the explicit specifier.
+//
+// For example, the following constructor and conversion function are
+// not explicit as they lack the explicit specifier:
+//
+// class Foo {
+// Foo();
+// operator int();
+// };
+//
+// While the following constructor and conversion function are
+// explicit as they are declared with the explicit specifier.
+//
+// class Foo {
+// explicit Foo();
+// explicit operator int();
+// };
+//
+// This function will return 0 when given a cursor pointing to one of
+// the former declarations and it will return 1 for a cursor pointing
+// to the latter declarations.
+//
+// The explicit specifier allows the user to specify a
+// conditional compile-time expression whose value decides
+// whether the marked element is explicit or not.
+//
+// For example:
+//
+// constexpr bool foo(int i) { return i % 2 == 0; }
+//
+// class Foo {
+// explicit(foo(1)) Foo();
+// explicit(foo(2)) operator int();
+// }
+//
+// This function will return 0 for the constructor and 1 for
+// the conversion function.
+func (c Cursor) CXXMethod_IsExplicit() bool {
+	o := C.clang_CXXMethod_isExplicit(c.c)
 
 	return o != C.uint(0)
 }
@@ -1109,6 +1255,24 @@ func (c Cursor) Evaluate() EvalResult {
 // Returns one of the CXResult enumerators.
 func (c Cursor) FindReferencesInFile(file File, visitor CursorAndRangeVisitor) Result {
 	return Result(C.clang_findReferencesInFile(c.c, file.c, visitor.c))
+}
+
+func (c Cursor) FindReferencesInFileWithBlock(f File, carvb CursorAndRangeVisitorBlock) Result {
+	return Result(C.clang_findReferencesInFileWithBlock(c.c, f.c, carvb.c))
+}
+
+// GetCursorBinaryOperatorKind retrieve the binary operator kind of this cursor.
+//
+// If this cursor is not a binary operator then returns Invalid.
+func (c Cursor) BinaryOperatorKind() BinaryOperatorKind {
+	return BinaryOperatorKind(C.clang_getCursorBinaryOperatorKind(c.c))
+}
+
+// GetCursorUnaryOperatorKind retrieve the unary operator kind of this cursor.
+//
+// If this cursor is not a unary operator then returns Invalid.
+func (c Cursor) UnaryOperatorKind() UnaryOperatorKind {
+	return UnaryOperatorKind(C.clang_getCursorUnaryOperatorKind(c.c))
 }
 
 func (c Cursor) Xdata() int32 {

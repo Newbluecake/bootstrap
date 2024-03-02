@@ -1,6 +1,6 @@
 package clang
 
-// #include "./clang-c/Index.h"
+// #include "./clang-c/CXSourceLocation.h"
 // #include "go-clang.h"
 import "C"
 import (

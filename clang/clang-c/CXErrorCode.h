@@ -1,4 +1,8 @@
 #include <stdint.h>
+#ifndef _UINTPTR_T
+  typedef __UINTPTR_TYPE__ uintptr_t;
+#define _UINTPTR_T
+#endif
 
 /*===-- clang-c/CXErrorCode.h - C Index Error Codes  --------------*- C -*-===*\
 |*                                                                            *|

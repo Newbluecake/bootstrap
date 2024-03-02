@@ -344,6 +344,22 @@ const (
 	//
 	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
 	Type_OCLIntelSubgroupAVCSicResult = C.CXType_OCLIntelSubgroupAVCSicResult
+	// Type_OCLIntelSubgroupAVCImeResultSingleReferenceStreamout represents a type that was referred to using an elaborated type keyword.
+	//
+	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
+	Type_OCLIntelSubgroupAVCImeResultSingleReferenceStreamout = C.CXType_OCLIntelSubgroupAVCImeResultSingleReferenceStreamout
+	// Type_OCLIntelSubgroupAVCImeResultDualReferenceStreamout represents a type that was referred to using an elaborated type keyword.
+	//
+	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
+	Type_OCLIntelSubgroupAVCImeResultDualReferenceStreamout = C.CXType_OCLIntelSubgroupAVCImeResultDualReferenceStreamout
+	// Type_OCLIntelSubgroupAVCImeSingleReferenceStreamin represents a type that was referred to using an elaborated type keyword.
+	//
+	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
+	Type_OCLIntelSubgroupAVCImeSingleReferenceStreamin = C.CXType_OCLIntelSubgroupAVCImeSingleReferenceStreamin
+	// Type_OCLIntelSubgroupAVCImeDualReferenceStreamin represents a type that was referred to using an elaborated type keyword.
+	//
+	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
+	Type_OCLIntelSubgroupAVCImeDualReferenceStreamin = C.CXType_OCLIntelSubgroupAVCImeDualReferenceStreamin
 	// Type_OCLIntelSubgroupAVCImeResultSingleRefStreamout represents a type that was referred to using an elaborated type keyword.
 	//
 	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
@@ -368,6 +384,10 @@ const (
 	//
 	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
 	Type_Atomic = C.CXType_Atomic
+	// Type_BTFTagAttributed represents a type that was referred to using an elaborated type keyword.
+	//
+	// E.g., struct S, or via a qualified name, e.g., N::M::type, or both.
+	Type_BTFTagAttributed = C.CXType_BTFTagAttributed
 )
 
 // GetTypeKindSpelling retrieve the spelling of a given CXTypeKind.

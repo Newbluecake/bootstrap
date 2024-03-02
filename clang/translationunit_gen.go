@@ -23,7 +23,7 @@ func (tu TranslationUnit) IsFileMultipleIncludeGuarded(file File) bool {
 
 // GetFile retrieve a file handle within the given translation unit.
 //
-// Parameter tu the translation unit
+// # Parameter tu the translation unit
 //
 // Parameter file_name the name of the file.
 //
@@ -449,6 +449,10 @@ func (tu TranslationUnit) CodeCompleteAt(completeFilename string, completeLine u
 // Returns one of the CXResult enumerators.
 func (tu TranslationUnit) FindIncludesInFile(file File, visitor CursorAndRangeVisitor) Result {
 	return Result(C.clang_findIncludesInFile(tu.c, file.c, visitor.c))
+}
+
+func (tu TranslationUnit) FindIncludesInFileWithBlock(f File, carvb CursorAndRangeVisitorBlock) Result {
+	return Result(C.clang_findIncludesInFileWithBlock(tu.c, f.c, carvb.c))
 }
 
 // Create create CXRewriter.

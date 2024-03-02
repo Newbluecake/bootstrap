@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-clang/bootstrap/clang"
+	"github.com/Newbluecake/go-clang-v17/clang"
 )
 
 func main() {

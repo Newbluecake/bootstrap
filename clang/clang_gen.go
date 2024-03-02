@@ -1,6 +1,8 @@
 package clang
 
 // #include "./clang-c/BuildSystem.h"
+// #include "./clang-c/CXDiagnostic.h"
+// #include "./clang-c/Documentation.h"
 // #include "./clang-c/FatalErrorHandler.h"
 // #include "./clang-c/Index.h"
 // #include "go-clang.h"
@@ -10,16 +12,6 @@ import "unsafe"
 // GetBuildSessionTimestamp return the timestamp for use with Clang's -fbuild-session-timestamp= option.
 func GetBuildSessionTimestamp() uint64 {
 	return uint64(C.clang_getBuildSessionTimestamp())
-}
-
-// Install_aborting_llvm_fatal_error_handler installs error handler that prints error message to stderr and calls abort(). Replaces currently installed error handler (if any).
-func InstallAbortingFatalErrorHandler() {
-	C.clang_install_aborting_llvm_fatal_error_handler()
-}
-
-// Uninstall_llvm_fatal_error_handler removes currently installed error handler (if any). If no error handler is intalled, the default strategy is to print error message to stderr and call exit(1).
-func UninstallFatalErrorHandler() {
-	C.clang_uninstall_llvm_fatal_error_handler()
 }
 
 // DefaultDiagnosticDisplayOptions retrieve the set of display options most similar to the
@@ -44,6 +36,40 @@ func GetDiagnosticCategoryName(category uint32) string {
 	defer o.Dispose()
 
 	return o.String()
+}
+
+// GetSymbolGraphForUSR generate a single symbol symbol graph for the given USR. Returns a null
+// string if the associated symbol can not be found in the provided CXAPISet.
+//
+// The output contains the symbol graph as well as some additional information
+// about related symbols.
+//
+// Parameter usr is a string containing the USR of the symbol to generate the
+// symbol graph for.
+//
+// Parameter api the CXAPISet to look for the symbol in.
+//
+// Returns a string containing the serialized symbol graph representation for
+// the symbol being queried or a null string if it can not be found in the
+// APISet.
+func GetSymbolGraphForUSR(usr string, api APISet) string {
+	c_usr := C.CString(usr)
+	defer C.free(unsafe.Pointer(c_usr))
+
+	o := cxstring{C.clang_getSymbolGraphForUSR(c_usr, api.c)}
+	defer o.Dispose()
+
+	return o.String()
+}
+
+// Install_aborting_llvm_fatal_error_handler installs error handler that prints error message to stderr and calls abort(). Replaces currently installed error handler (if any).
+func InstallAbortingFatalErrorHandler() {
+	C.clang_install_aborting_llvm_fatal_error_handler()
+}
+
+// Uninstall_llvm_fatal_error_handler removes currently installed error handler (if any). If no error handler is intalled, the default strategy is to print error message to stderr and call exit(1).
+func UninstallFatalErrorHandler() {
+	C.clang_uninstall_llvm_fatal_error_handler()
 }
 
 // DefaultEditingTranslationUnitOptions returns the set of flags that is suitable for parsing a translation

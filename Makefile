@@ -14,7 +14,7 @@ test:
 	CGO_LDFLAGS="-L${LLVM_LIBDIR} -Wl,-rpath,${LLVM_LIBDIR}" go test -v -race -shuffle=on -run=${GO_TEST_FUNC} ./...
 
 docker/test:
-	docker container run --rm -it -e GO_TEST_FUNC=${GO_TEST_FUNC} --mount type=bind,src=$(CURDIR),dst=/go/src/github.com/Newbluecake/go-clang-v17 -w /go/src/github.com/Newbluecake/bootstrap ghcr.io/go-clang/base:${LLVM_VERSION} make test
+	docker container run --rm -it -e GO_TEST_FUNC=${GO_TEST_FUNC} --mount type=bind,src=$(CURDIR),dst=/go/src/github.com/Newbluecake/bootstrap -w /go/src/github.com/Newbluecake/bootstrap ghcr.io/go-clang/base:${LLVM_VERSION} make test
 
 install:
 	echo "not implemented yet"

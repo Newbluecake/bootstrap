@@ -2,5 +2,5 @@
 package clang
 
 import (
-	_ "github.com/Newbluecake/go-clang-v17/clang/clang-c"
+	_ "github.com/Newbluecake/bootstrap/clang/clang-c"
 )

@@ -1,7 +1,7 @@
-# Newbluecake/go-clang-v17
+# Newbluecake/bootstrap
 
-[![PkgGoDev](https://pkg.go.dev/badge/Newbluecake/go-clang-v17)](https://pkg.go.dev/github.com/Newbluecake/go-clang-v17)
-[![GitHub Workflow](https://img.shields.io/github/workflow/status/Newbluecake/go-clang-v17/Test/main?label=test&logo=github&style=flat-square)](https://github.com/Newbluecake/go-clang-v17/actions)
+[![PkgGoDev](https://pkg.go.dev/badge/Newbluecake/bootstrap)](https://pkg.go.dev/github.com/Newbluecake/bootstrap)
+[![GitHub Workflow](https://img.shields.io/github/workflow/status/Newbluecake/bootstrap/Test/main?label=test&logo=github&style=flat-square)](https://github.com/Newbluecake/bootstrap/actions)
 
 Native Go bindings for Clang's C API.
 
@@ -9,7 +9,7 @@ Native Go bindings for Clang's C API.
 
 ```bash
 CGO_LDFLAGS="-L`llvm-config --libdir`" \
-  go get -u github.com/Newbluecake/go-clang-v17/...
+  go get -u github.com/Newbluecake/bootstrap
 ```
 
 ## Usage

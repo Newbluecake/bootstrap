@@ -1,3 +1,3 @@
-module github.com/Newbluecake/go-clang-v17
+module github.com/Newbluecake/bootstrap
 
 go 1.13

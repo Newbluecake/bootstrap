@@ -15,3 +15,6 @@ test:
 
 docker/test:
 	docker container run --rm -it -e GO_TEST_FUNC=${GO_TEST_FUNC} --mount type=bind,src=$(CURDIR),dst=/go/src/github.com/go-clang/bootstrap -w /go/src/github.com/go-clang/bootstrap ghcr.io/go-clang/base:${LLVM_VERSION} make test
+
+install:
+	echo "not implemented yet"
